@@ -1,2 +1,5 @@
-# CO12-Threads-and-quee
-CO12_Threads_and_queue
+# CO12 Threads and queue
+
+# Projeto com threads utilizando algoritimos de fila
+
+
