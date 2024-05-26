@@ -1,23 +1,31 @@
-from pymongo import MongoClient
-from sensor import criaSensorTemp, temperature
 import threading
+from pymongo import MongoClient
+from caixa import cria_fila_caixa, atendimento_cliente
 
-# Conexão com o banco
-client =  MongoClient('mongodb+srv://root:6qAsN$-!8sUPVbg@cluster0.slkiyz1.mongodb.net/test')
+# Configurações do banco de dados
+MONGODB_URL = 'mongodb+srv://root:6qAsN$-!8sUPVbg@cluster0.slkiyz1.mongodb.net/test'
+DB_NAME = 'supermarket'
 
-# Criando ou acessando o database
-db = client['bancoiot']
+# # Conexão com o banco de dados
+client = MongoClient(MONGODB_URL)
+db = client[DB_NAME]
+treads = []
 
-# Criando ou acessando a collection
-sensores = db.sensores
+# Conexão com o banco de dados (substitua pelas suas configurações)
+caixas_collection = db.caixas
 
-# Para criar um novo sensor execute esta linha alterando de X para o numero do sensor
-# criaSensorTemp('TempX', sensores)
+# Criando caixas
+caixas = ['Caixa1']
+for caixa in caixas:
+  cria_fila_caixa(caixa, caixas_collection)
 
+# Iniciando atendimento nos caixas
+for caixa in caixas:
+  t = threading.Thread(target=atendimento_cliente, args=(caixa, 5, caixas_collection))
+  t.start()
 
-x = threading.Thread(target=temperature, args=('Temp1', 5, sensores))
-y = threading.Thread(target=temperature, args=('Temp2', 5, sensores))
-z = threading.Thread(target=temperature, args=('Temp3', 5, sensores))
-x.start()
-y.start()
-z.start()
+# Aguardando todos os caixas serem fechados
+for t in threads:
+  t.join()
+
+print("Todos os caixas foram fechados.")
