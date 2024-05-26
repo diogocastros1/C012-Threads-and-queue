@@ -3,85 +3,88 @@ import time
 import queue
 import random
 
-#Classe Cliente:
+# Classe Cliente:
 class Cliente:
     def __init__(self, id, tempo_atendimento):
         self.id = id
         self.tempo_atendimento = tempo_atendimento
         self.tempo_espera = 0
 
+# Classe Caixa, que representa um caixa que atende clientes
 class Caixa:
     def __init__(self, id):
         self.id = id
         self.semaphore = threading.Semaphore(1)  # Semáforo binário (mutex)
     
+    # Método para atender um cliente
     def atender_cliente(self, cliente):
-        with self.semaphore:
+        with self.semaphore:  # Garantindo exclusão mútua
             print(f"Caixa {self.id} atendendo cliente {cliente.id} com tempo de atendimento {cliente.tempo_atendimento}")
             time.sleep(cliente.tempo_atendimento)  # Simulando tempo de atendimento
             print(f"Caixa {self.id} terminou de atender cliente {cliente.id}")
 
-
+# Função que será executada por cada thread de caixa
 def caixa_thread(caixa, fila_clientes):
     while not fila_clientes.empty():
-        cliente = fila_clientes.get()
-        caixa.atender_cliente(cliente)
-        fila_clientes.task_done()
-        
+        cliente = fila_clientes.get()  # Pega o próximo cliente da fila
+        caixa.atender_cliente(cliente)  # Atende o cliente
+        fila_clientes.task_done()  # Marca a tarefa como concluída
 
-
+# Função que implementa o algoritmo FCFS (First Come First Served)
 def fcfs(clientes):
     fila_clientes = queue.Queue()
     for cliente in clientes:
-        fila_clientes.put(cliente)
+        fila_clientes.put(cliente)  # Adiciona todos os clientes na fila
     
-    caixas = [Caixa(i) for i in range(3)]  # Exemplo com 3 caixas
+    caixas = [Caixa(i) for i in range(3)]  # Cria 3 caixas
     threads = []
     
     for caixa in caixas:
         t = threading.Thread(target=caixa_thread, args=(caixa, fila_clientes))
         threads.append(t)
-        t.start()
+        t.start()  # Inicia a thread
     
     for t in threads:
-        t.join()
+        t.join()  # Aguarda todas as threads terminarem
 
+# Função que implementa o algoritmo Round Robin
 def round_robin(clientes, quantum):
     fila_clientes = queue.Queue()
     for cliente in clientes:
-        fila_clientes.put(cliente)
+        fila_clientes.put(cliente)  # Adiciona todos os clientes na fila
     
-    caixas = [Caixa(i) for i in range(3)]  # Exemplo com 3 caixas
+    caixas = [Caixa(i) for i in range(3)]  # Cria 3 caixas
     threads = []
     
+    # Função que será executada por cada thread de caixa para Round Robin
     def caixa_rr_thread(caixa):
         while not fila_clientes.empty():
-            cliente = fila_clientes.get()
+            cliente = fila_clientes.get()  # Pega o próximo cliente da fila
             if cliente.tempo_atendimento > quantum:
                 print(f"Caixa {caixa.id} atendendo cliente {cliente.id} por {quantum} unidades de tempo")
                 cliente.tempo_atendimento -= quantum
                 time.sleep(quantum)
-                fila_clientes.put(cliente)
+                fila_clientes.put(cliente)  # Recoloca o cliente na fila
             else:
                 print(f"Caixa {caixa.id} atendendo cliente {cliente.id} por {cliente.tempo_atendimento} unidades de tempo")
                 time.sleep(cliente.tempo_atendimento)
-            fila_clientes.task_done()
+            fila_clientes.task_done()  # Marca a tarefa como concluída
     
     for caixa in caixas:
         t = threading.Thread(target=caixa_rr_thread, args=(caixa,))
         threads.append(t)
-        t.start()
+        t.start()  # Inicia a thread
     
     for t in threads:
-        t.join()
+        t.join()  # Aguarda todas as threads terminarem
 
-
+# Função para calcular o tempo de espera médio dos clientes
 def calcular_tempo_espera_medio(clientes):
     total_espera = sum(cliente.tempo_atendimento for cliente in clientes)
     return total_espera / len(clientes)
 
 def main():
-    # Criando lista de clientes
+    # Criando lista de clientes com tempos de atendimento aleatórios
     clientes = [Cliente(i, random.randint(1, 5)) for i in range(10)]
     
     # Simulando FCFS
@@ -119,7 +122,4 @@ def main():
         print("Ambos os algoritmos levaram o mesmo tempo para executar")
 
 if __name__ == "__main__":
-    main()
-
-
-
+    main()  # Executa a função principal
