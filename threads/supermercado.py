@@ -3,49 +3,6 @@ import time
 import queue
 import random
 
-class Cliente:
-    def __init__(self, id, tempo_atendimento):
-        self.id = id
-        self.tempo_atendimento = tempo_atendimento
-        self.tempo_espera = 0
-
-def fcfs(clientes):
-    tempo_atual = 0
-    for cliente in clientes:
-        cliente.tempo_espera = tempo_atual
-        print(f"Atendendo cliente {cliente.id} com tempo de atendimento {cliente.tempo_atendimento}")
-        time.sleep(cliente.tempo_atendimento)  # Simulando tempo de atendimento
-        tempo_atual += cliente.tempo_atendimento
-
-def round_robin(clientes, quantum):
-    fila = queue.Queue()
-    for cliente in clientes:
-        fila.put(cliente)
-    
-    tempo_atual = 0
-    while not fila.empty():
-        cliente = fila.get()
-        if cliente.tempo_atendimento > quantum:
-            cliente.tempo_atendimento -= quantum
-            fila.put(cliente)
-            print(f"Atendendo cliente {cliente.id} por {quantum} unidades de tempo")
-            time.sleep(quantum)
-            tempo_atual += quantum
-        else:
-            print(f"Atendendo cliente {cliente.id} por {cliente.tempo_atendimento} unidades de tempo")
-            time.sleep(cliente.tempo_atendimento)
-            tempo_atual += cliente.tempo_atendimento
-        cliente.tempo_espera += tempo_atual - cliente.tempo_atendimento
-
-def calcular_tempo_espera_medio(clientes):
-    total_espera = sum(cliente.tempo_espera for cliente in clientes)
-    return total_espera / len(clientes)
-
-import threading
-import time
-import queue
-import random
-
 #Classe Cliente:
 class Cliente:
     def __init__(self, id, tempo_atendimento):
@@ -119,7 +76,7 @@ def round_robin(clientes, quantum):
 
 
 def calcular_tempo_espera_medio(clientes):
-    total_espera = sum(cliente.tempo_espera for cliente in clientes)
+    total_espera = sum(cliente.tempo_atendimento for cliente in clientes)
     return total_espera / len(clientes)
 
 def main():
